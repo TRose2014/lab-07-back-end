@@ -40,6 +40,7 @@ function Weather(day){
 let searchToLatLong = (request, response) => {
   // const data = request.query.data;
   const geoData = require('./data/geo.json'); //geoCode API goes here
+  // const geoData = `https://maps.googleapis.com/maps/api/geocode/json?address=${data}&key=${process.env.GEOCODE_API_KEY}`;
   let location =  new Location(request.query, geoData.results[0]);
 
   response.send(location);
