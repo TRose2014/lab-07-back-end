@@ -32,6 +32,7 @@ function Location(query, data){
 }
 
 function Weather(day){
+  console.log(day);
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 
@@ -53,10 +54,15 @@ let searchToLatLong = (request, response) => {
 };
 
 let getWeather = (request, response) => {
-  const data = request.query.data;
-  const url = './data/darksky.json';
+  const data = request.query;
+  const darkSky = require('./data/darksky.json'); //darkSky API goes here
 
-  // return superagent.get(url)
+  console.log(darkSky.daily.data[0]);
+  let weather = new Weather(darkSky.daily.data[0]);
+
+  response.send(weather);
+
+  // return superagent.get(darkSky)
   //   .then(result => {
   //     const weatherSummaries = result.body.daily.data.map(day => {
   //       return new Weather(day);
