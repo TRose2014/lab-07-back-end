@@ -6,78 +6,70 @@ require('dotenv').config();
 //Application Dependencies
 const express = require('express');
 const cors  = require('cors');
+const superagent =  require('superagent');
 
 //Application Setup
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
 
-//API Routes
-//------------Location-------------//
-app.get('/location', (request, response) => {
-  try {
-    const locationData = searchToLatLong(request.query.data);
-    response.send(locationData);
-  }
-  catch (error) {
-    console.log(error);
-    response.status(500).send('Status: 500. So sorry, something went wrong');
-  }
-});
+//--------------Handle Errors-------------------//
+let handleError = (err, response) => {
+  console.error(err);
+  if(response) response.status(500).send('Status: 500. So sorry, something went wrong');
 
-//Helper Function
-function searchToLatLong(query) {
-  if(!query) throw new Error('No query sent');
-  const geoData =require('./data/geo.json');
-  const location = {
-    search_query: query,
-    formatted_query: geoData.results[0].formatted_address,
-    latitude: geoData.results[0].geometry.location.lat,
-    longitude: geoData.results[0].geometry.location.lng
-  };
-  return location;
+};
+
+//---------------Constructor Functions----------------------//
+
+//Refactor
+function Location(query, data){
+  this.search_query = query;
+  this.formatted_query = data.formatted_address;
+  this.latitude = data.geometry.location.lat;
+  this.longitude = data.geometry.location.lng;
+
 }
 
-//-------Weather---------//
-app.get('/weather', (request, response) => {
-  try {
-    const weatherData = searchWeather(request.query.data);
-    response.send(weatherData);
-  }
-  catch (error) {
-    console.log(error);
-    response.status(500).send('Status: 500. So sorry, something went wrong');
-  }
-});
+function Weather(day){
+  this.forecast = day.summary;
+  this.time = new Date(day.time * 1000).toString().slice(0, 15);
 
-//Helper Function
-function searchWeather(query) {
-  if(!query) throw new Error('No query sent');
-  const darkSky =require('./data/darksky.json');
-  let weather = {
-    search_query: query,
-    latitude: darkSky.latitude,
-    longitude: darkSky.longitude,
-    time: darkSky.currently.time,
-    summary: darkSky.currently.summary
-
-  };
-  return weather;
 }
+//----------------Callbacks----------------//
+let searchToLatLong = (request, response) => {
+  // const data = request.query.data;
+  const geoData = require('./data/geo.json'); //geoCode API goes here
+  let location =  new Location(request.query, geoData.results[0]);
+
+  response.send(location);
 
 
-// //Refactor
-// function Location(query, geoData){
-//   this.search_query = query;
-//   this.formatted_query = geoData.results[0].formatted_address;
-//   this.latitude = geoData.results[0].geometry.location.lat;
-//   this.longitude = geoData.results[0].geometry.location.lng;
+  // return superagent.get(url)
+  //   .then(result => {
+  //     response.send(new Location(data, result.body.results[0]));
+  //   })
+  //   .catch(error => handleError(error, response));
+};
 
-//   if(!query) throw new Error('No query sent');
+let getWeather = (request, response) => {
+  const data = request.query.data;
+  const url = './data/darksky.json';
 
-// }
+  // return superagent.get(url)
+  //   .then(result => {
+  //     const weatherSummaries = result.body.daily.data.map(day => {
+  //       return new Weather(day);
+  //     });
+  //     response.send(weatherSummaries);
+  //   })
+  //   .catch(error => handleError(error, response));
+};
 
 
+//-------------------API Routes-------------------///
+app.get('/location', searchToLatLong);
+app.get('/weather', getWeather);
 
 
 
