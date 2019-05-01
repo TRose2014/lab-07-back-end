@@ -1,0 +1,31 @@
+{
+  "name": "lab-06-back-end",
+  "version": "1.0.0",
+  "description": "lab06 City Explorer",
+  "engines": {
+    "node": "11.14.0"
+  },
+  "main": "server.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node server.js",
+    "watch": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mwilkin/lab-06-back-end.git"
+  },
+  "author": "Tia Rose",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mwilkin/lab-06-back-end/issues"
+  },
+  "homepage": "https://github.com/mwilkin/lab-06-back-end#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^7.0.0",
+    "express": "^4.16.4",
+    "nodemon": "^1.19.0",
+    "superagent": "^5.0.5"
+  }
+}
