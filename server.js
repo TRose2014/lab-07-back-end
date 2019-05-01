@@ -32,7 +32,6 @@ function Location(query, data){
 }
 
 function Weather(day){
-  console.log(day);
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 
@@ -57,15 +56,14 @@ let getWeather = (request, response) => {
   const data = request.query;
   const darkSky = require('./data/darksky.json'); //darkSky API goes here
 
-  console.log(darkSky.daily.data[0]);
-  let weather = new Weather(darkSky.daily.data[0]);  
-  //This was not working due to bad directions. So in the future, the source 
+  let weather = new Weather(darkSky.daily.data[0]);
+  //This was not working due to bad directions. So in the future, the source
   //file needs to be paid close attention when structuring a get. Key names, item names, etc. MATTER!
   //Ex. Jane Doe, 123 Main St, Anytown, USA 99999 - you cannot find Jane at 546 Skippy Street, Anytown USA, 99999
   //She can only be found at 123 Main St. So darksky.json does not have an address of result or body therefore
   //they cannot be used in new Weather(darksky.daily.data[0]).
 
-  response.send(weather);
+  response.send([weather]);
 
   // return superagent.get(darkSky)
   //   .then(result => {
