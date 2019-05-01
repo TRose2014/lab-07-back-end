@@ -63,7 +63,8 @@ let getWeather = (request, response) => {
   //She can only be found at 123 Main St. So darksky.json does not have an address of result or body therefore
   //they cannot be used in new Weather(darksky.daily.data[0]).
 
-  response.send([weather]);
+  // response.send([weather]); Works to render info to the front-end
+  response.send(weather);
 
   // return superagent.get(darkSky)
   //   .then(result => {
