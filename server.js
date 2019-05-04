@@ -104,6 +104,7 @@ let getWeather = (request, response) => {
 //-------------------API Routes-------------------///
 app.get('/location', searchToLatLong);
 app.get('/weather', getWeather);
+app.get('/events', searchEvents);
 
 
 
