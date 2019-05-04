@@ -62,9 +62,20 @@ let searchToLatLong = (request, response) => {
 
 let getWeather = (request, response) => {
   const data = request.query.data;
-  const darkSky = require('./data/darksky.json'); //darkSky API goes here
+  const darkSky = `https://api.darksky.net/forecast/${process.env.DARKSKY_API_KEY}/${data.latitude},${data.longitude}`;
 
-  let weather = new Weather(darkSky.daily.data[0]);
+  return superagent.get(darkSky)
+  .then(result => {
+    let weather = result.body.daily.data.map( day => {
+      return new Weather(day);
+
+    });
+    
+    response.send(weather);
+  })
+
+  .catch(error => handleError(error, response));
+};
   //This was not working due to bad directions. So in the future, the source
   //file needs to be paid close attention when structuring a get. Key names, item names, etc. MATTER!
   //Ex. Jane Doe, 123 Main St, Anytown, USA 99999 - you cannot find Jane at 546 Skippy Street, Anytown USA, 99999
@@ -72,18 +83,23 @@ let getWeather = (request, response) => {
   //they cannot be used in new Weather(darksky.daily.data[0]).
 
   // response.send([weather]); Works to render info to the front-end
-  response.send(weather);
 
-  // return superagent.get(darkSky)
-  //   .then(result => {
-  //     const weatherSummaries = result.body.daily.data.map(day => {
-  //       return new Weather(day);
-  //     });
-  //     response.send(weatherSummaries);
-  //   })
-  //   .catch(error => handleError(error, response));
-};
-
+  let searchEvents = (request, response) => {
+    const data = request.query.data;
+    const eventBrite = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${data.formatted.query}`;
+  
+    return superagent.get(eventBrite)
+    .then(result => {
+      let eventList = result.body.events.map(eventInfo => {
+        return new Events(eventInfo);
+  
+      });
+      
+      response.send(eventList);
+    })
+  
+    .catch(error => handleError(error, response));
+  };
 
 //-------------------API Routes-------------------///
 app.get('/location', searchToLatLong);
