@@ -36,28 +36,46 @@ function Weather(day){
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 
 }
+
+function Events(location) {
+  let time = Date.parse(location.start.local);
+  let newDate = new Date(time).toDateString();
+
+  this.event = newDate;
+  this.url = location.url;
+  this.name = location.name.text;
+  this.summary = location.summary;
+}
+
 //----------------Callbacks----------------//
 let searchToLatLong = (request, response) => {
-  // const data = request.query.data;
-  const geoData = require('./data/geo.json'); //geoCode API goes here
-  // const geoData = `https://maps.googleapis.com/maps/api/geocode/json?address=${data}&key=${process.env.GEOCODE_API_KEY}`;
-  let location =  new Location(request.query, geoData.results[0]);
+  const data = request.query.data;
+  const geoData = `https://maps.googleapis.com/maps/api/geocode/json?address=${data}&key=${process.env.GEOCODE_API_KEY}`;
 
-  response.send(location);
+  return superagent.get(geoData)
+    .then(result => {
+      response.send(new Location(data, result.body.results[0]));
+    })
 
-
-  // return superagent.get(url)
-  //   .then(result => {
-  //     response.send(new Location(data, result.body.results[0]));
-  //   })
-  //   .catch(error => handleError(error, response));
+    .catch(error => handleError(error, response));
 };
 
 let getWeather = (request, response) => {
-  const data = request.query;
-  const darkSky = require('./data/darksky.json'); //darkSky API goes here
+  const data = request.query.data;
+  const darkSky = `https://api.darksky.net/forecast/${process.env.DARKSKY_API_KEY}/${data.latitude},${data.longitude}`;
 
-  let weather = new Weather(darkSky.daily.data[0]);
+  return superagent.get(darkSky)
+  .then(result => {
+    let weather = result.body.daily.data.map( day => {
+      return new Weather(day);
+
+    });
+    
+    response.send(weather);
+  })
+
+  .catch(error => handleError(error, response));
+};
   //This was not working due to bad directions. So in the future, the source
   //file needs to be paid close attention when structuring a get. Key names, item names, etc. MATTER!
   //Ex. Jane Doe, 123 Main St, Anytown, USA 99999 - you cannot find Jane at 546 Skippy Street, Anytown USA, 99999
@@ -65,22 +83,28 @@ let getWeather = (request, response) => {
   //they cannot be used in new Weather(darksky.daily.data[0]).
 
   // response.send([weather]); Works to render info to the front-end
-  response.send(weather);
 
-  // return superagent.get(darkSky)
-  //   .then(result => {
-  //     const weatherSummaries = result.body.daily.data.map(day => {
-  //       return new Weather(day);
-  //     });
-  //     response.send(weatherSummaries);
-  //   })
-  //   .catch(error => handleError(error, response));
-};
-
+  let searchEvents = (request, response) => {
+    const data = request.query.data;
+    const eventBrite = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${data.formatted.query}`;
+  
+    return superagent.get(eventBrite)
+    .then(result => {
+      let eventList = result.body.events.map(eventInfo => {
+        return new Events(eventInfo);
+  
+      });
+      
+      response.send(eventList);
+    })
+  
+    .catch(error => handleError(error, response));
+  };
 
 //-------------------API Routes-------------------///
 app.get('/location', searchToLatLong);
 app.get('/weather', getWeather);
+app.get('/events', searchEvents);
 
 
 
