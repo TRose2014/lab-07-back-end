@@ -86,7 +86,7 @@ let getWeather = (request, response) => {
 
   let searchEvents = (request, response) => {
     const data = request.query.data;
-    const eventBrite = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${data.formatted.query}`;
+    const eventBrite = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${data.formatted_query}`;
   
     return superagent.get(eventBrite)
     .then(result => {
