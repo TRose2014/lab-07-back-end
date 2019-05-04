@@ -36,25 +36,32 @@ function Weather(day){
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 
 }
+
+function Events(location) {
+  let time = Date.parse(location.start.local);
+  let newDate = new Date(time).toDateString();
+
+  this.event = newDate;
+  this.url = location.url;
+  this.name = location.name.text;
+  this.summary = location.summary;
+}
+
 //----------------Callbacks----------------//
 let searchToLatLong = (request, response) => {
-  // const data = request.query.data;
-  const geoData = require('./data/geo.json'); //geoCode API goes here
-  // const geoData = `https://maps.googleapis.com/maps/api/geocode/json?address=${data}&key=${process.env.GEOCODE_API_KEY}`;
-  let location =  new Location(request.query, geoData.results[0]);
+  const data = request.query.data;
+  const geoData = `https://maps.googleapis.com/maps/api/geocode/json?address=${data}&key=${process.env.GEOCODE_API_KEY}`;
 
-  response.send(location);
+  return superagent.get(geoData)
+    .then(result => {
+      response.send(new Location(data, result.body.results[0]));
+    })
 
-
-  // return superagent.get(url)
-  //   .then(result => {
-  //     response.send(new Location(data, result.body.results[0]));
-  //   })
-  //   .catch(error => handleError(error, response));
+    .catch(error => handleError(error, response));
 };
 
 let getWeather = (request, response) => {
-  const data = request.query;
+  const data = request.query.data;
   const darkSky = require('./data/darksky.json'); //darkSky API goes here
 
   let weather = new Weather(darkSky.daily.data[0]);
